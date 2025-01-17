@@ -32,6 +32,7 @@ export default function TabLayout() {
           },
           headerShown: false,
         }}>
+
         <Tabs.Screen
           name="index"
           options={{
@@ -46,6 +47,7 @@ export default function TabLayout() {
             ),
           }}
         />
+        
         <Tabs.Screen
           name="two"
           options={{
