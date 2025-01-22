@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, FlatList, ActivityIndicator, TextInput, TouchableOpacity, Modal, View } from 'react-native';
 import { Text } from '@/components/Themed';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+import { router } from 'expo-router';
 
 type Aeroclub = {
   id: number;
@@ -20,6 +24,7 @@ const categories = [
 ];
 
 export default function TabSchoolsScreen() {
+  const navigation = useNavigation<{ navigate: (screen: string, params: { aeroclubId: number }) => void }>();
   const [aeroclubs, setAeroclubs] = useState<Aeroclub[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -85,13 +90,22 @@ export default function TabSchoolsScreen() {
         </TouchableOpacity>
       </View>
       <FlatList
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No se encontraron aeroclubes</Text>
+          </View>
+        )}
         data={filteredAeroclubs}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
+          <TouchableOpacity
+          onPress={() => router.push(`/aeroclubScreen?id=${item.id}`)}
+        >
           <View style={styles.aeroclubContainer}>
             <Text style={styles.aeroclubName}>{item.nombre}</Text>
             <Text style={styles.aeroclubProvincia}>{item.provincia}</Text>
           </View>
+          </TouchableOpacity>
         )}
       />
       <Modal
@@ -183,6 +197,16 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     backgroundColor: '#1F2C37',
   },
+  emptyText: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop:20,
+  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -210,6 +234,8 @@ const styles = StyleSheet.create({
     paddingLeft: 130,
     paddingRight: 130,
     marginVertical: 10,
+    height: 100,
+    width: '100%',
     justifyContent: 'center',
   },
   aeroclubName: {
