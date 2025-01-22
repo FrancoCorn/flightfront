@@ -7,10 +7,15 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { router } from 'expo-router';
 
-type Aeroclub = {
+export type Aeroclub = {
   id: number;
   nombre: string;
   provincia: string;
+  direccion: string;
+  latitud: number;
+  longitud: number;
+  contacto: string;
+  categorias: string[];
 };
 
 const categories = [
