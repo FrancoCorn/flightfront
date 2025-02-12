@@ -16,6 +16,8 @@ export type Aeroclub = {
   longitud: number;
   contacto: string;
   categorias: string[];
+  maps: string;
+  img: string;  
 };
 
 const categories = [
@@ -38,7 +40,7 @@ export default function TabSchoolsScreen() {
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8080/api/aeroclubes/')
+    fetch('http://192.168.1.15:8080/api/aeroclubes/')
       .then((response) => response.json())
       .then((data) => {
         setAeroclubs(data);
@@ -152,7 +154,7 @@ export default function TabSchoolsScreen() {
                 
                 if (selectedCategoryIds) {
                   
-                  fetch(`http://127.0.0.1:8080/aeroclubes/get_aeroclubs_with_category/${selectedCategoryIds}/`)
+                  fetch(`http://192.168.1.15:8080/aeroclubes/get_aeroclubs_with_category/${selectedCategoryIds}/`)
                     .then((response) => response.json())
                     .then((data) => {
                       setFilteredAeroclubs(data);
@@ -164,7 +166,7 @@ export default function TabSchoolsScreen() {
                     });
                 } else{
                   
-                  fetch('http://127.0.0.1:8080/api/aeroclubes/')
+                  fetch('http://192.168.1.15:8080/api/aeroclubes/')
                   .then((response) => response.json())
                   .then((data) => {
                     setAeroclubs(data);

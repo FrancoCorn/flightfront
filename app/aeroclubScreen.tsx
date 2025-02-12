@@ -1,8 +1,8 @@
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {Aeroclub} from './(tabs)/schools';
+import { Aeroclub } from './(tabs)/schools';
 
 export default function AeroclubScreen() {
   const { id } = useLocalSearchParams(); 
@@ -17,6 +17,8 @@ export default function AeroclubScreen() {
     longitud: 0,
     contacto: '',
     categorias: [],
+    maps: '',
+    img: '',
   });
 
   useLayoutEffect(() => {
@@ -26,7 +28,7 @@ export default function AeroclubScreen() {
   }, [navigation]);
 
   useEffect(() => {
-      fetch(`http://127.0.0.1:8080/aeroclubes/get_aeroclub_by_id/${id}/`)
+      fetch(`http://192.168.1.15:8080/aeroclubes/get_aeroclub_by_id/${id}/`)
         .then((response) => response.json())
         .then((data) => {
           setAeroclub(data);
@@ -46,7 +48,6 @@ export default function AeroclubScreen() {
         );
       }
 
-    
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -54,22 +55,25 @@ export default function AeroclubScreen() {
       </TouchableOpacity>
       <Text style={styles.title}>{aeroclub.nombre}</Text>
       <View style={styles.rectangle}>
-        <Text style={styles.img}>IMG</Text>
+        <Image source={{ uri: aeroclub.img }} style={styles.img} />
         <Text style={styles.idText}>{aeroclub.direccion}</Text>
         <Text style={styles.idText}>{aeroclub.categorias.join(', ')}</Text>
-       
         <Text style={styles.idText}>Contacto: {aeroclub.contacto}</Text>
-        <View style={styles.mapButton}>
-          <Text style={{ color: '#fff' }}>Ver en el mapa</Text>
-        </View>
-        <View style={styles.contactButton}>
-          <Text style={{ color: '#fff' }}>Contactar</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={() => router.push(`/mapScreen?maps=${aeroclub.maps}`)}
+            style={styles.mapButton}
+          >
+            <Text style={{ color: '#fff' }}>Ver en el mapa</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.contactButton}>
+            <Text style={{ color: '#fff' }}>Contactar</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -91,14 +95,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   img: {
-    fontSize: 18,
-    color: '#000',
+    width: '100%',
+    height: 200,
     marginBottom: 20,
+    borderRadius: 10,
   },
   idText: {
     fontSize: 18,
     color: '#000',
     marginBottom: 20,
+    textAlign: 'left', // Align text to the left
+    width: '100%', // Ensure the text takes full width
   },
   rectangle: {
     flex: 2,
@@ -107,32 +114,35 @@ const styles = StyleSheet.create({
     height: 600,
     backgroundColor: '#a5a5a5',
     borderRadius: 10,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    marginTop: 20,
+    alignItems: 'center',
     padding: 20,
+    marginTop: 20,
     position: 'relative',
   },
-  mapButton: {
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
     position: 'absolute',
     bottom: 20,
-    left: 20,
-    width: '43%',
-    height:40,
-    backgroundColor: '#2B373F',
-    borderRadius: 10,
-    padding: 10,
-    alignItems: 'center',
+    paddingHorizontal: '5%',
   },
-  contactButton: {
-    position: 'absolute',
-    bottom: 20,
-    left: '53%',
-    width: '43%',
+  mapButton: {
+    width: '45%',
     height: 40,
     backgroundColor: '#2B373F',
-    borderRadius: 10,
+    borderRadius: 20,
     padding: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contactButton: {
+    width: '45%',
+    height: 40,
+    backgroundColor: '#2B373F',
+    borderRadius: 20,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
