@@ -1,4 +1,4 @@
-import React from 'react';
+import React,  { useContext } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Tabs } from 'expo-router';
 import { Pressable, View, StyleSheet } from 'react-native';
@@ -6,6 +6,8 @@ import { Pressable, View, StyleSheet } from 'react-native';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { AuthContext } from "../context/AuthContext";
+import LoginScreen from "../auth/LoginScreen";
 
 // Icon component for tab bar
 function TabBarIcon(props: {
@@ -17,6 +19,10 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const auth = useContext(AuthContext);
+  if (!auth?.userToken) {
+    return <LoginScreen />;
+  }
 
   return (
     <View style={styles.container}> {/* Wrapper for the entire app */}
