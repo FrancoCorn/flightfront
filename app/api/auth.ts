@@ -15,9 +15,9 @@ export const loginUser = async (username: string, password: string) => {
     return null;
   }
 };
-export const registerUser = async (username: string, email: string, password: string) => {
+export const registerUser = async (username: string, password: string, nombre: string, genero: string, licencias: string, aviones:string) => {
     try {
-      const response = await axios.post(`${API_URL}register/`, { username, email, password });
+      const response = await axios.post(`${API_URL}register/`, { username, password, nombre, genero, licencias, aviones });
       return response.data.access; 
     } catch (error) {
       if (axios.isAxiosError(error)) {

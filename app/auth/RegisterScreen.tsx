@@ -5,8 +5,11 @@ import { AuthContext } from "../context/AuthContext";
 const RegisterScreen = ({ navigation }: any) => {
   const auth = useContext(AuthContext);
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [genero, setGenero] = useState("");
+  const [licencias, setLicencias] = useState("");
+  const [aviones, setAviones] = useState("");
 
   if (!auth) return null;
 
@@ -21,15 +24,7 @@ const RegisterScreen = ({ navigation }: any) => {
         value={username}
         onChangeText={setUsername}
       />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Correo Electrónico"
-        placeholderTextColor="#aaa"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
+      
 
       <TextInput
         style={styles.input}
@@ -40,7 +35,40 @@ const RegisterScreen = ({ navigation }: any) => {
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity style={styles.button} onPress={() => auth.register(username, email, password)}>
+      <TextInput
+        style={styles.input}
+        placeholder="Nombre"
+        placeholderTextColor="#aaa"
+        value={nombre}
+        secureTextEntry
+        onChangeText={setNombre}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Genero"
+        placeholderTextColor="#aaa"
+        value={genero}
+        secureTextEntry
+        onChangeText={setGenero}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Licencias"
+        placeholderTextColor="#aaa"
+        value={licencias}
+        secureTextEntry
+        onChangeText={setLicencias}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Aviones"
+        placeholderTextColor="#aaa"
+        value={aviones}
+        secureTextEntry
+        onChangeText={setAviones}
+      />
+
+      <TouchableOpacity style={styles.button} onPress={() => auth.register(username, password, nombre, genero, licencias, aviones )}>
         <Text style={styles.buttonText}>Registrarse</Text>
       </TouchableOpacity>
 

@@ -6,7 +6,7 @@ interface AuthContextType {
   userToken: string | null;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  register: (username: string, email: string, password: string) => void;
+  register: (username: string, password: string, nombre: string, genero: string, licencias: string, aviones: string) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,13 +35,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await AsyncStorage.removeItem('userToken');
   };
 
-  const register = (username: string, email: string, password: string) => {
-    console.log("Registrando usuario:", username, email);
-    registerUser(username,email, password);
+  const register = (username: string, password: string, nombre: string, genero: string, licencias: string, aviones:string) => {
+    console.log("Registrando usuario:", username);
+    registerUser(username, password, nombre, genero, licencias, aviones );
   };
 
   return (
-    <AuthContext.Provider value={{ userToken, login, logout,register  }}>
+    <AuthContext.Provider value={{ userToken, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
