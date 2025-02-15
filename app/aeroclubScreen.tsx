@@ -2,7 +2,7 @@ import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Aeroclub } from './(tabs)/schools';
+import { Aeroclub, url_ip } from './(tabs)/schools';
 
 export default function AeroclubScreen() {
   const { id } = useLocalSearchParams(); 
@@ -28,7 +28,7 @@ export default function AeroclubScreen() {
   }, [navigation]);
 
   useEffect(() => {
-      fetch(`http://192.168.1.15:8080/aeroclubes/get_aeroclub_by_id/${id}/`)
+      fetch(`${url_ip}/aeroclubes/get_aeroclub_by_id/${id}/`)
         .then((response) => response.json())
         .then((data) => {
           setAeroclub(data);

@@ -3,6 +3,7 @@ import { Text, View } from '@/components/Themed';
 import { useContext, useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { AuthContext } from '../context/AuthContext';
+import { url_ip } from './schools';
 
 export default function TabOneScreen() {
   const auth = useContext(AuthContext);
@@ -23,7 +24,7 @@ export default function TabOneScreen() {
 
   const fetchProfileData = () => {
     if (auth.userToken) {
-      fetch('http://192.168.1.15:8080/api/auth/user-info/', {
+      fetch(`${url_ip}/api/auth/user-info/`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${auth.userToken}`
@@ -50,7 +51,7 @@ export default function TabOneScreen() {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://192.168.1.15:8080/api/auth/edit-user-licenses/', {
+      const response = await fetch(`${url_ip}/api/auth/edit-user-licenses/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,7 +61,7 @@ export default function TabOneScreen() {
       });
       const data = await response.json();
       setProfileData(data);
-      const response2 = await fetch('http://192.168.1.15:8080/api/auth/edit-user-planes/', {
+      const response2 = await fetch(`${url_ip}/api/auth/edit-user-planes/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

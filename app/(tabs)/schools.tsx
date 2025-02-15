@@ -7,6 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { router } from 'expo-router';
 
+export const url_ip = 'http://192.168.1.27:8080'
 export type Aeroclub = {
   id: number;
   nombre: string;
@@ -40,7 +41,7 @@ export default function TabSchoolsScreen() {
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
-    fetch('http://192.168.1.15:8080/api/aeroclubes/')
+    fetch(`${url_ip}/api/aeroclubes/`)
       .then((response) => response.json())
       .then((data) => {
         setAeroclubs(data);
@@ -154,7 +155,7 @@ export default function TabSchoolsScreen() {
                 
                 if (selectedCategoryIds) {
                   
-                  fetch(`http://192.168.1.15:8080/aeroclubes/get_aeroclubs_with_category/${selectedCategoryIds}/`)
+                  fetch(`${url_ip}/aeroclubes/get_aeroclubs_with_category/${selectedCategoryIds}/`)
                     .then((response) => response.json())
                     .then((data) => {
                       setFilteredAeroclubs(data);
@@ -166,7 +167,7 @@ export default function TabSchoolsScreen() {
                     });
                 } else{
                   
-                  fetch('http://192.168.1.15:8080/api/aeroclubes/')
+                  fetch(`${url_ip}/api/aeroclubes/`)
                   .then((response) => response.json())
                   .then((data) => {
                     setAeroclubs(data);
