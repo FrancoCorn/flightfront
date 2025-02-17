@@ -1,4 +1,4 @@
-import React,  { useContext } from 'react';
+import React, { useContext } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Tabs } from 'expo-router';
 import { Pressable, View, StyleSheet } from 'react-native';
@@ -25,7 +25,7 @@ export default function TabLayout() {
   }
 
   return (
-    <View style={styles.container}> {/* Wrapper for the entire app */}
+    <View style={styles.container}> 
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tabIconSelected,
@@ -35,6 +35,10 @@ export default function TabLayout() {
             borderTopWidth: 0, 
             elevation: 0, 
             shadowOpacity: 0, 
+            justifyContent: 'center', 
+          },
+          tabBarIconStyle: {
+            marginTop: 10, 
           },
           headerShown: false,
         }}>
@@ -48,17 +52,8 @@ export default function TabLayout() {
                 name="user"
                 color={'#fff'}
                 size={28}
-                style={{ marginTop: 20 }} 
               />
             ),
-          }}
-        />
-        
-        <Tabs.Screen
-          name="two"
-          options={{
-            title: 'Tab Two',
-            tabBarIcon: ({ color }) => <TabBarIcon name="code" color={'#fff'} />,
           }}
         />
         <Tabs.Screen
@@ -70,7 +65,33 @@ export default function TabLayout() {
                 name="plane"
                 color={'#fff'}
                 size={28}
-                style={{ marginTop: 20 }} 
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="sales"
+          options={{
+            title: '',
+            tabBarIcon: ({ color }) => (
+              <FontAwesome
+                name="handshake-o"
+                color={'#fff'}
+                size={28}
+              />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="comunication"
+          options={{
+            title: '',
+            tabBarIcon: ({ color }) => (
+              <FontAwesome
+                name="comments"
+                color={'#fff'}
+                size={28}
               />
             ),
           }}

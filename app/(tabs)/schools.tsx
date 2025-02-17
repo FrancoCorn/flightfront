@@ -18,7 +18,8 @@ export type Aeroclub = {
   contacto: string;
   categorias: string[];
   maps: string;
-  img: string;  
+  img: string;
+  user: string;  
 };
 
 const categories = [

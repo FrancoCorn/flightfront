@@ -19,6 +19,7 @@ export default function AeroclubScreen() {
     categorias: [],
     maps: '',
     img: '',
+    user: '',
   });
 
   useLayoutEffect(() => {
@@ -32,6 +33,7 @@ export default function AeroclubScreen() {
         .then((response) => response.json())
         .then((data) => {
           setAeroclub(data);
+          console.log(data)
           setLoading(false);
         })
         .catch((error) => {
@@ -66,7 +68,9 @@ export default function AeroclubScreen() {
           >
             <Text style={{ color: '#fff' }}>Ver en el mapa</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.contactButton}>
+          <TouchableOpacity style={styles.contactButton}
+          
+          onPress={() => router.push(`/chatScreen?username=${aeroclub.user}`)}>
             <Text style={{ color: '#fff' }}>Contactar</Text>
           </TouchableOpacity>
         </View>
