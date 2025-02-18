@@ -8,7 +8,7 @@ import { AuthContext } from "./context/AuthContext";
 export const ForumScreen = () => {
   const auth = useContext(AuthContext);
   const { username } = useLocalSearchParams();
-  const [messages, setMessages] = useState<{ sender__username: string; message: string }[]>([]);
+  const [messages, setMessages] = useState<{ sender__username: string; message: string;  timestamp: string  }[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
   if (!auth) return null;
@@ -21,7 +21,7 @@ export const ForumScreen = () => {
       }
     });
     const data = await response.json();
-    setMessages(data);
+    setMessages(data.reverse());
   };
 
   useEffect(() => {
@@ -52,9 +52,10 @@ export const ForumScreen = () => {
         data={messages}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <View style={styles.messageContainer}>
+          <View style={item.sender__username === auth.username ? styles.messageContainerSender : styles.messageContainerRecieved}>
             <Text style={styles.sender}>{item.sender__username}:</Text>
             <Text style={styles.message}>{item.message}</Text>
+            <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
           </View>
         )}
       />
@@ -77,14 +78,23 @@ const styles = StyleSheet.create({
     padding: 10,
     width: "100%",
   },
-  messageContainer: {
-    backgroundColor: "#1E1E1E", // Fondo del mensaje
+  messageContainerRecieved: {
+    backgroundColor: "#2B373F", // Fondo del mensaje recibido
     padding: 10,
     borderRadius: 8,
     marginVertical: 5,
+    width: "70%",
+  },
+  messageContainerSender: {
+    backgroundColor: "#2874A6", // Fondo del mensaje enviado
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 5,
+    width: "70%",
+    alignSelf: "flex-end",
   },
   sender: {
-    color: "#FFD700", // Amarillo para el nombre del usuario
+    color: "#fff", // Amarillo para el nombre del usuario
     fontWeight: "bold",
   },
   message: {
@@ -98,6 +108,11 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginVertical: 10,
+  },
+  timestamp: {
+    color: "#bbb",
+    fontSize: 10,
+    alignSelf: "flex-end",
   },
 });
 

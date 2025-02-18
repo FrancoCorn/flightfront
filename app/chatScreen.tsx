@@ -9,7 +9,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 const ChatScreen = () => {
   const auth = useContext(AuthContext);
   const { username } = useLocalSearchParams();
-  const [messages, setMessages] = useState<{ sender__username: string; message: string }[]>([]);
+  const [messages, setMessages] = useState<{ sender__username: string; message: string; timestamp: string }[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const navigation = useNavigation();
 
@@ -57,17 +57,23 @@ const ChatScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Icon name="arrow-back" size={24} color="#fff" />
-      </TouchableOpacity>
+      <View style={styles.header}>
+        <View style={styles.headerBackground}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.title}>{username}</Text>
+        </View>
+      </View>
       <FlatList
-        contentContainerStyle={{ paddingTop: 80 }} // Añade espacio superior para el botón de retroceso
+        contentContainerStyle={{ paddingTop: 80 }} 
         data={messages}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <View style={styles.messageContainer}>
+          <View style={item.sender__username === auth.username ? styles.messageContainerSender : styles.messageContainerRecieved}>
             <Text style={styles.sender}>{item.sender__username}:</Text>
             <Text style={styles.message}>{item.message}</Text>
+            <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
           </View>
         )}
       />
@@ -89,18 +95,56 @@ const styles = StyleSheet.create({
     backgroundColor: "#1F2C37", // Fondo oscuro
     padding: 10,
   },
-  messageContainer: {
-    backgroundColor: "#1E1E1E", // Fondo del mensaje
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1, // Asegura que el contenedor esté por encima de otros elementos
+  },
+  headerBackground: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#1F2C37', // Fondo azul
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+  backButton: {
+    zIndex: 1, // Asegura que el botón esté por encima de otros elementos
+  },
+  title: { 
+    fontSize: 24, 
+    color: "#fff",
+    textAlign: 'center',
+    flex: 1,
+  },
+  messageContainerRecieved: {
+    backgroundColor: "#2B373F", // Fondo del mensaje recibido
     padding: 10,
     borderRadius: 8,
     marginVertical: 5,
+    width: "70%",
+  },
+  messageContainerSender: {
+    backgroundColor: "#2874A6", // Fondo del mensaje enviado
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 5,
+    width: "70%",
+    alignSelf: "flex-end",
   },
   sender: {
-    color: "#FFD700", // Amarillo para el nombre del usuario
+    color: "#FFF", // Amarillo para el nombre del usuario
     fontWeight: "bold",
   },
   message: {
     color: "#FFF", // Blanco para el texto del mensaje
+  },
+  timestamp: {
+    color: "#bbb",
+    fontSize: 10,
+    alignSelf: "flex-end",
   },
   input: {
     borderWidth: 1,
@@ -110,12 +154,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginVertical: 10,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    zIndex: 1, // Asegura que el botón esté por encima de otros elementos
   },
 });
 
