@@ -49,7 +49,7 @@ export default function TabLayout() {
             title: '',
             tabBarIcon: ({ color }) => (
               <FontAwesome
-                name="user"
+                name="info"
                 color={'#fff'}
                 size={28}
               />
@@ -63,6 +63,19 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => (
               <FontAwesome
                 name="plane"
+                color={'#fff'}
+                size={28}
+              />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="hangares"
+          options={{
+            title: '',
+            tabBarIcon: ({ color }) => (
+              <FontAwesome
+                name="wrench"
                 color={'#fff'}
                 size={28}
               />

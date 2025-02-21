@@ -35,7 +35,7 @@ const CommunicationScreen = () => {
 
   const fetchChats = async () => {
     try {
-      const response = await fetch("http://192.168.1.27:8080/chat/active/", {
+      const response = await fetch("http://192.168.1.21:8080/chat/active/", {
         headers: {
           'Authorization': `Bearer ${auth.userToken}`
         }
@@ -50,7 +50,7 @@ const CommunicationScreen = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://192.168.1.27:8080/users/all/?format=json");
+      const response = await fetch("http://192.168.1.21:8080/users/all/?format=json");
       const data = await response.json();
 
       setUsers(data);

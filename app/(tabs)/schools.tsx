@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { StyleSheet, FlatList, ActivityIndicator, TextInput, TouchableOpacity, Modal, View } from 'react-native';
 import { Text } from '@/components/Themed';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { AuthContext } from '../context/AuthContext';
 
 import { router } from 'expo-router';
 
-export const url_ip = 'http://192.168.1.27:8080'
+export const url_ip = 'http://192.168.1.21:8080'
 export type Aeroclub = {
   id: number;
   nombre: string;
@@ -39,7 +40,9 @@ export default function TabSchoolsScreen() {
   const [search, setSearch] = useState('');
   const [filteredAeroclubs, setFilteredAeroclubs] = useState<Aeroclub[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [settingsVisible, setSettingsVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: boolean }>({});
+  const auth = useContext(AuthContext);
 
   useEffect(() => {
     fetch(`${url_ip}/api/aeroclubes/`)
@@ -67,18 +70,23 @@ export default function TabSchoolsScreen() {
   if (loading) {
     return (
       <View style={styles.container}>
-              <Text style={styles.title}>Escuelas de vuelo</Text>
-              <View style={styles.searchContainer}>
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Buscar por nombre o provincia"
-                  value={search}
-                  onChangeText={setSearch}
-                />
-                <TouchableOpacity style={styles.filterButton} onPress={() => setModalVisible(true)}>
-                  <Icon name="filter" size={24} color="#000" />
-                </TouchableOpacity>
-              </View>
+        <View style={styles.header}>
+          <Text style={styles.title}>Escuelas de vuelo</Text>
+          <TouchableOpacity style={styles.settingsButton} onPress={() => setSettingsVisible(true)}>
+            <Icon name="settings" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar por nombre o provincia"
+            value={search}
+            onChangeText={setSearch}
+          />
+          <TouchableOpacity style={styles.filterButton} onPress={() => setModalVisible(true)}>
+            <Icon name="filter" size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
         <ActivityIndicator size="large" color="#fff" />
       </View>
     );
@@ -86,7 +94,12 @@ export default function TabSchoolsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Escuelas de vuelo</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Escuelas de vuelo</Text>
+        <TouchableOpacity style={styles.settingsButton} onPress={() => setSettingsVisible(true)}>
+          <Icon name="settings" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -108,12 +121,12 @@ export default function TabSchoolsScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-          onPress={() => router.push(`/aeroclubScreen?id=${item.id}`)}
-        >
-          <View style={styles.aeroclubContainer}>
-            <Text style={styles.aeroclubName}>{item.nombre}</Text>
-            <Text style={styles.aeroclubProvincia}>{item.provincia}</Text>
-          </View>
+            onPress={() => router.push(`/aeroclubScreen?id=${item.id}`)}
+          >
+            <View style={styles.aeroclubContainer}>
+              <Text style={styles.aeroclubName}>{item.nombre}</Text>
+              <Text style={styles.aeroclubProvincia}>{item.provincia}</Text>
+            </View>
           </TouchableOpacity>
         )}
       />
@@ -194,6 +207,18 @@ export default function TabSchoolsScreen() {
           </View>
         </View>
       </Modal>
+      {settingsVisible && (
+        <TouchableOpacity style={styles.overlay} onPress={() => setSettingsVisible(false)}>
+          <View style={styles.settingsMenu}>
+            <TouchableOpacity style={styles.settingsOption} onPress={() => { router.push(`/profile`) }}>
+              <Text style={styles.settingsOptionText}>Perfil</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.settingsOption} onPress={auth?.logout}>
+              <Text style={styles.settingsOptionText}>Cerrar sesión</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -205,6 +230,15 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     paddingTop: 20,
     backgroundColor: '#1F2C37',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '90%',
+  },
+  settingsButton: {
+    marginLeft: 10,
   },
   emptyText: {
     fontSize: 16,
@@ -308,5 +342,28 @@ const styles = StyleSheet.create({
   applyButtonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  settingsMenu: {
+    position: 'absolute',
+    top: 60,
+    right: 20,
+    backgroundColor: '#a5a5a5',
+    borderRadius: 10,
+    padding: 10,
+  },
+  settingsOption: {
+    marginVertical: 5,
+  },
+  settingsOptionText: {
+    fontSize: 16,
+    color: '#000',
   },
 });
