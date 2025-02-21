@@ -22,6 +22,11 @@ export type Aeroclub = {
   img: string;
   user: string;  
 };
+export type FlightSchool = {
+  legajoentidad: number;
+  denominacion: string;
+  domicilio: string;
+};
 
 const categories = [
   { id: 1, name: 'Planeador' },
@@ -36,9 +41,11 @@ const categories = [
 export default function TabSchoolsScreen() {
   const navigation = useNavigation<{ navigate: (screen: string, params: { aeroclubId: number }) => void }>();
   const [aeroclubs, setAeroclubs] = useState<Aeroclub[]>([]);
+  const [flightSchools, setFlightSchools] = useState<FlightSchool[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filteredAeroclubs, setFilteredAeroclubs] = useState<Aeroclub[]>([]);
+  const [filteredFlightSchools, setFilteredFlightSchools] = useState<FlightSchool[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: boolean }>({});
@@ -59,6 +66,25 @@ export default function TabSchoolsScreen() {
   }, []);
 
   useEffect(() => {
+    fetch(`https://geo.anac.gob.ar/escuela`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data && Array.isArray(data.data)) {
+          const sortedFlightSchools = data.data.sort((a: FlightSchool, b: FlightSchool) => a.legajoentidad - b.legajoentidad);
+          setFlightSchools(sortedFlightSchools);
+          setFilteredFlightSchools(sortedFlightSchools);
+        } else {
+          console.error('Error: Expected an array of flight schools');
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching flight schools:', error);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
     setFilteredAeroclubs(
       aeroclubs.filter((aeroclub) =>
         aeroclub.nombre.toLowerCase().includes(search.toLowerCase()) ||
@@ -66,6 +92,14 @@ export default function TabSchoolsScreen() {
       )
     );
   }, [search, aeroclubs]);
+
+  useEffect(() => {
+    setFilteredFlightSchools(
+      flightSchools.filter((flightSchool) =>
+        flightSchool.denominacion.toLowerCase().includes(search.toLowerCase())
+      )
+    );
+  }, [search, flightSchools]);
 
   if (loading) {
     return (
@@ -117,15 +151,14 @@ export default function TabSchoolsScreen() {
             <Text style={styles.emptyText}>No se encontraron aeroclubes</Text>
           </View>
         )}
-        data={filteredAeroclubs}
-        keyExtractor={(item) => item.id.toString()}
+        data={filteredFlightSchools}
+        keyExtractor={(item, index) => item.legajoentidad ? item.legajoentidad.toString() : index.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => router.push(`/aeroclubScreen?id=${item.id}`)}
+            onPress={() => router.push(`/aeroclubScreen?id=${item.legajoentidad}`)}
           >
             <View style={styles.aeroclubContainer}>
-              <Text style={styles.aeroclubName}>{item.nombre}</Text>
-              <Text style={styles.aeroclubProvincia}>{item.provincia}</Text>
+              <Text style={styles.aeroclubName}>{item.denominacion}</Text>
             </View>
           </TouchableOpacity>
         )}
