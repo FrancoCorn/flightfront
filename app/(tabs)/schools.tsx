@@ -5,28 +5,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { AuthContext } from '../context/AuthContext';
+import { useAeroclubContext } from '../context/AeroclubContext'; // Importa el contexto
 
 import { router } from 'expo-router';
 
-export const url_ip = 'http://192.168.1.21:8080'
-export type Aeroclub = {
-  id: number;
-  nombre: string;
-  provincia: string;
-  direccion: string;
-  latitud: number;
-  longitud: number;
-  contacto: string;
-  categorias: string[];
-  maps: string;
-  img: string;
-  user: string;  
-};
-export type FlightSchool = {
-  legajoentidad: number;
-  denominacion: string;
-  domicilio: string;
-};
+export const url_ip = 'http://192.168.1.21:8080';
 
 const categories = [
   { id: 1, name: 'Planeador' },
@@ -40,49 +23,13 @@ const categories = [
 
 export default function TabSchoolsScreen() {
   const navigation = useNavigation<{ navigate: (screen: string, params: { aeroclubId: number }) => void }>();
-  const [aeroclubs, setAeroclubs] = useState<Aeroclub[]>([]);
-  const [flightSchools, setFlightSchools] = useState<FlightSchool[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { aeroclubs, loading, fetchAeroclubs } = useAeroclubContext(); // Usa el contexto
   const [search, setSearch] = useState('');
-  const [filteredAeroclubs, setFilteredAeroclubs] = useState<Aeroclub[]>([]);
-  const [filteredFlightSchools, setFilteredFlightSchools] = useState<FlightSchool[]>([]);
+  const [filteredAeroclubs, setFilteredAeroclubs] = useState(aeroclubs);
   const [modalVisible, setModalVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: boolean }>({});
   const auth = useContext(AuthContext);
-
-  useEffect(() => {
-    fetch(`${url_ip}/api/aeroclubes/`)
-      .then((response) => response.json())
-      .then((data) => {
-        setAeroclubs(data);
-        setFilteredAeroclubs(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching aeroclubs:', error);
-        setLoading(false);
-      });
-  }, []);
-
-  useEffect(() => {
-    fetch(`https://geo.anac.gob.ar/escuela`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data && Array.isArray(data.data)) {
-          const sortedFlightSchools = data.data.sort((a: FlightSchool, b: FlightSchool) => a.legajoentidad - b.legajoentidad);
-          setFlightSchools(sortedFlightSchools);
-          setFilteredFlightSchools(sortedFlightSchools);
-        } else {
-          console.error('Error: Expected an array of flight schools');
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching flight schools:', error);
-        setLoading(false);
-      });
-  }, []);
 
   useEffect(() => {
     setFilteredAeroclubs(
@@ -92,14 +39,6 @@ export default function TabSchoolsScreen() {
       )
     );
   }, [search, aeroclubs]);
-
-  useEffect(() => {
-    setFilteredFlightSchools(
-      flightSchools.filter((flightSchool) =>
-        flightSchool.denominacion.toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }, [search, flightSchools]);
 
   if (loading) {
     return (
@@ -151,14 +90,15 @@ export default function TabSchoolsScreen() {
             <Text style={styles.emptyText}>No se encontraron aeroclubes</Text>
           </View>
         )}
-        data={filteredFlightSchools}
-        keyExtractor={(item, index) => item.legajoentidad ? item.legajoentidad.toString() : index.toString()}
+        data={filteredAeroclubs}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => router.push(`/aeroclubScreen?id=${item.legajoentidad}`)}
+            onPress={() => router.push(`/aeroclubScreen?id=${item.id}`)}
           >
             <View style={styles.aeroclubContainer}>
-              <Text style={styles.aeroclubName}>{item.denominacion}</Text>
+              <Text style={styles.aeroclubName}>{item.nombre}</Text>
+              <Text style={styles.aeroclubProvincia}>{item.provincia}</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -195,42 +135,25 @@ export default function TabSchoolsScreen() {
             <TouchableOpacity
               style={styles.applyButton}
               onPress={() => {
-                setLoading(true);
                 const selectedCategoryIds = Object.keys(selectedFilters)
                   .filter((categoryId) => selectedFilters[categoryId])
                   .join(",");
-                
+
                 if (selectedCategoryIds) {
-                  
                   fetch(`${url_ip}/aeroclubes/get_aeroclubs_with_category/${selectedCategoryIds}/`)
                     .then((response) => response.json())
                     .then((data) => {
                       setFilteredAeroclubs(data);
-                      setLoading(false);
                     })
                     .catch((error) => {
                       console.error("Error fetching aeroclubs:", error);
-                      
                     });
-                } else{
-                  
-                  fetch(`${url_ip}/api/aeroclubes/`)
-                  .then((response) => response.json())
-                  .then((data) => {
-                    setAeroclubs(data);
-                    setFilteredAeroclubs(data);
-                    setLoading(false);
-                    
-                  })
-                  .catch((error) => {
-                    console.error('Error fetching aeroclubs:', error);
-                    
-                  });
+                } else {
+                  fetchAeroclubs();
                 }
-                
+
                 setModalVisible(false);
               }}
-              
             >
               <Text style={styles.applyButtonText}>Aplicar</Text>
             </TouchableOpacity>
@@ -281,7 +204,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop:20,
+    marginTop: 20,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -352,11 +275,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 10,
-    width: '100%', 
+    width: '100%',
   },
   checkbox: {
     marginRight: 10,
-    
   },
   filterText: {
     fontSize: 16,
