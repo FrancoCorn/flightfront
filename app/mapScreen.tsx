@@ -5,8 +5,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { WebView } from 'react-native-webview';
 
 const MapScreen = () => {
-    const { maps } = useLocalSearchParams(); 
+    const  nombre = useLocalSearchParams(); 
     const navigation = useNavigation();
+    console.log(nombre)
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -20,7 +21,7 @@ const MapScreen = () => {
                 <Icon name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <WebView 
-                source={{ uri: Array.isArray(maps) ? maps[0] : maps }} 
+                source={{ uri: `https://www.google.com/maps/search/?api=1&query=${nombre.maps}` }} 
                 style={styles.webview}
             />
         </View>

@@ -11,6 +11,7 @@ const CommunicationScreen = () => {
   const [selectedOption, setSelectedOption] = useState("Mensajes Privados");
   const [searchQuery, setSearchQuery] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [settingsVisible, setSettingsVisible] = useState(false);
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [users, setUsers] = useState<{ id: number; username: string }[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<{ id: number; username: string }[]>([]);
@@ -103,19 +104,30 @@ const CommunicationScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Comunicación</Text>
+      <View style={styles.header}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Comunicación</Text>
+        </View>
+        <TouchableOpacity style={styles.settingsButton} onPress={() => setSettingsVisible(true)}>
+          <Icon name="settings" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.optionsContainer}>
         <TouchableOpacity
           style={[styles.optionButton, selectedOption === "Mensajes Privados" && styles.selectedOption]}
           onPress={() => setSelectedOption("Mensajes Privados")}
         >
-          <Text style={styles.optionText}>Mensajes Privados</Text>
+          <Text style={[styles.optionText, selectedOption === "Mensajes Privados" && styles.selectedOptionText]}>
+            Mensajes Privados
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.optionButton, selectedOption === "Foro" && styles.selectedOption]}
           onPress={() => setSelectedOption("Foro")}
         >
-          <Text style={styles.optionText}>Foro</Text>
+          <Text style={[styles.optionText, selectedOption === "Foro" && styles.selectedOptionText]}>
+            Foro
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -157,7 +169,7 @@ const CommunicationScreen = () => {
         style={styles.fab}
         onPress={() => setModalVisible(true)}
       >
-        <Icon name="add" size={30} color="#fff" />
+        <Icon name="add" size={30} color="#000" />
       </TouchableOpacity>
 
       <Modal
@@ -202,6 +214,19 @@ const CommunicationScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {settingsVisible && (
+        <TouchableOpacity style={styles.overlay} onPress={() => setSettingsVisible(false)}>
+          <View style={styles.settingsMenu}>
+            <TouchableOpacity style={styles.settingsOption} onPress={() => { router.push(`/profile`) }}>
+              <Text style={styles.settingsOptionText}>Perfil</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.settingsOption} onPress={auth?.logout}>
+              <Text style={styles.settingsOptionText}>Cerrar sesión</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -212,12 +237,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#1F2C37', 
     padding: 10,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    position: 'relative',
+    marginTop: 15,
+    marginBottom: 25,
+  },
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 20,
     textAlign: "center",
+  },
+  settingsButton: {
+    position: 'absolute',
+    right: 0,
   },
   optionsContainer: {
     flexDirection: "row",
@@ -230,11 +271,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#2B373F",
   },
   selectedOption: {
-    backgroundColor: "#1E90FF",
+    backgroundColor: "#a5a5a5",
   },
   optionText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  selectedOptionText: {
+    color: "#000",
   },
   separator: {
     marginVertical: 3,
@@ -287,7 +331,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 20,
     bottom: 20,
-    backgroundColor: "#1E90FF",
+    backgroundColor: "#a5a5a5",
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -340,6 +384,29 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "#FFF",
     fontWeight: "bold",
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  settingsMenu: {
+    position: 'absolute',
+    top: 60,
+    right: 20,
+    backgroundColor: '#a5a5a5',
+    borderRadius: 10,
+    padding: 10,
+  },
+  settingsOption: {
+    marginVertical: 5,
+  },
+  settingsOptionText: {
+    fontSize: 16,
+    color: '#000',
   },
 });
 

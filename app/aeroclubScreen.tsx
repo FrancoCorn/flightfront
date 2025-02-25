@@ -2,7 +2,8 @@ import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { Aeroclub, url_ip } from './(tabs)/schools';
+import { url_ip } from './(tabs)/schools';
+import { Aeroclub } from './context/AeroclubContext';
 
 export default function AeroclubScreen() {
   const { id } = useLocalSearchParams(); 
@@ -29,33 +30,34 @@ export default function AeroclubScreen() {
   }, [navigation]);
 
   useEffect(() => {
-      fetch(`${url_ip}/aeroclubes/get_aeroclub_by_id/${id}/`)
-        .then((response) => response.json())
-        .then((data) => {
-          setAeroclub(data);
-          console.log(data)
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error('Error fetching aeroclubs:', error);
-          setLoading(false);
-        });
-    }, []);
+    fetch(`${url_ip}/aeroclubes/get_aeroclub_by_id/${id}/`)
+      .then((response) => response.json())
+      .then((data) => {
+        setAeroclub(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching aeroclubs:', error);
+        setLoading(false);
+      });
+  }, [id]);
 
-    if (loading) {
-        return (
-          <View style={styles.container}>
-            <ActivityIndicator size="large" color="#fff" />
-          </View>
-        );
-      }
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Icon name="arrow-back" size={24} color="#fff" />
-      </TouchableOpacity>
-      <Text style={styles.title}>{aeroclub.nombre}</Text>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Icon name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.title}>{aeroclub.nombre}</Text>
+      </View>
       <View style={styles.rectangle}>
         <Image source={{ uri: aeroclub.img }} style={styles.img} />
         <Text style={styles.idText}>{aeroclub.direccion}</Text>
@@ -63,14 +65,22 @@ export default function AeroclubScreen() {
         <Text style={styles.idText}>Contacto: {aeroclub.contacto}</Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            onPress={() => router.push(`/mapScreen?maps=${aeroclub.maps}`)}
+            onPress={() => {
+              if (aeroclub.nombre != '' && aeroclub.provincia != '') {
+                console.log(`Nombre: ${aeroclub.nombre}, Provincia: ${aeroclub.provincia}`);
+                router.push(`/mapScreen?maps=${aeroclub.nombre+','+aeroclub.provincia}`);
+              } else {
+                console.error('Nombre o provincia no definidos');
+              }
+            }}
             style={styles.mapButton}
           >
             <Text style={{ color: '#fff' }}>Ver en el mapa</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.contactButton}
-          
-          onPress={() => router.push(`/chatScreen?username=${aeroclub.user}`)}>
+          <TouchableOpacity
+            style={styles.contactButton}
+            onPress={() => router.push(`/chatScreen?username=${aeroclub.user}`)}
+          >
             <Text style={{ color: '#fff' }}>Contactar</Text>
           </TouchableOpacity>
         </View>
@@ -78,6 +88,7 @@ export default function AeroclubScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -86,17 +97,21 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     backgroundColor: '#1F2C37',
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    width: '90%',
+    marginBottom: 20,
+  },
   backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
+    marginRight: 10,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 20,
-    marginTop: 10,
+    flexShrink: 1,
   },
   img: {
     width: '100%',

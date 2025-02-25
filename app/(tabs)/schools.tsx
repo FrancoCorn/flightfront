@@ -29,22 +29,34 @@ export default function TabSchoolsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: boolean }>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
   const auth = useContext(AuthContext);
 
   useEffect(() => {
     setFilteredAeroclubs(
-      aeroclubs.filter((aeroclub) =>
-        aeroclub.nombre.toLowerCase().includes(search.toLowerCase()) ||
-        aeroclub.provincia.toLowerCase().includes(search.toLowerCase())
-      )
+      aeroclubs
+        .filter((aeroclub) =>
+          aeroclub.nombre.toLowerCase().includes(search.toLowerCase()) ||
+          aeroclub.provincia.toLowerCase().includes(search.toLowerCase())
+        )
+        .sort((a, b) => a.id - b.id)
     );
   }, [search, aeroclubs]);
+
+  const handleLoadMore = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const paginatedAeroclubs = filteredAeroclubs.slice(0, currentPage * itemsPerPage);
 
   if (loading) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Escuelas de vuelo</Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Escuelas de vuelo</Text>
+          </View>
           <TouchableOpacity style={styles.settingsButton} onPress={() => setSettingsVisible(true)}>
             <Icon name="settings" size={24} color="#fff" />
           </TouchableOpacity>
@@ -68,7 +80,9 @@ export default function TabSchoolsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Escuelas de vuelo</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Escuelas de vuelo</Text>
+        </View>
         <TouchableOpacity style={styles.settingsButton} onPress={() => setSettingsVisible(true)}>
           <Icon name="settings" size={24} color="#fff" />
         </TouchableOpacity>
@@ -90,7 +104,7 @@ export default function TabSchoolsScreen() {
             <Text style={styles.emptyText}>No se encontraron aeroclubes</Text>
           </View>
         )}
-        data={filteredAeroclubs}
+        data={paginatedAeroclubs}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -102,6 +116,8 @@ export default function TabSchoolsScreen() {
             </View>
           </TouchableOpacity>
         )}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
       />
       <Modal
         animationType="fade"
@@ -191,10 +207,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '90%',
+    width: '100%',
+    position: 'relative',
+    marginTop: 10,
+    marginBottom: 17,
+  },
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
   },
   settingsButton: {
-    marginLeft: 10,
+    position: 'absolute',
+    right: 0,
+    marginRight: 10,
   },
   emptyText: {
     fontSize: 16,
@@ -230,11 +261,9 @@ const styles = StyleSheet.create({
   aeroclubContainer: {
     backgroundColor: '#a5a5a5',
     borderRadius: 5,
-    paddingLeft: 130,
-    paddingRight: 130,
+    padding: 10,
     marginVertical: 10,
-    height: 100,
-    width: '100%',
+    width: '95%',
     justifyContent: 'center',
   },
   aeroclubName: {
@@ -245,12 +274,6 @@ const styles = StyleSheet.create({
   aeroclubProvincia: {
     fontSize: 16,
     color: '#000',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 10,
   },
   modalContainer: {
     flex: 1,
