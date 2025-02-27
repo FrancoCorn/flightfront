@@ -1,14 +1,20 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, FlatList } from 'react-native';
+import React, { useState, useContext, useEffect, useCallback } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, FlatList, Image, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
 import { AuthContext } from '../context/AuthContext';
+import { supabase } from '../supabaseConfig';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
+import { router } from 'expo-router';
 
 type Product = {
   id: number;
   nombre: string;
   precio: string;
   moneda: string;
+  imgUrls: string[];
 };
 
 export default function TabSales() {
@@ -22,8 +28,10 @@ export default function TabSales() {
   const [categoria, setCategoria] = useState('Aeronaves');
   const [descripcion, setDescripcion] = useState('');
   const [contacto, setContacto] = useState('');
+  const [imgUrls, setImgUrls] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loadingImages, setLoadingImages] = useState(false);
   const itemsPerPage = 20;
   const auth = useContext(AuthContext);
   if (!auth) return null;
@@ -81,6 +89,7 @@ export default function TabSales() {
             categoria,
             descripcion,
             contacto,
+            imgUrls,
           }),
         });
 
@@ -93,6 +102,7 @@ export default function TabSales() {
           setCategoria('Aeronaves');
           setDescripcion('');
           setContacto('');
+          setImgUrls([]);
           fetchProducts();
         } else {
           alert('Error al publicar el producto');
@@ -103,6 +113,36 @@ export default function TabSales() {
       }
     }
   };
+
+  const pickImages = useCallback(async () => {
+    setLoadingImages(true);
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsMultipleSelection: true,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      for (let i = 0; i < result.assets.length; i++) {
+        const img = result.assets[i];
+        const localUri = img.uri;
+
+        const base64 = await FileSystem.readAsStringAsync(localUri, { encoding: 'base64' });
+        const filePath = `${auth.username}/${"image"}-${Date.now()}.${localUri.split('.').pop()}`;
+        const contentType = img.mimeType;
+
+        const response = await supabase.storage.from('productos').upload(filePath, decode(base64), { contentType });
+        const { data, error } = await supabase.storage.from('productos').createSignedUrl(filePath, 60 * 60 * 7 * 4 * 12 * 10);
+        if (error) {
+          console.error('Error uploading image:', error);
+        } else {
+          setImgUrls((prevUrls) => [...prevUrls, data.signedUrl]);
+        }
+      }
+    }
+    setLoadingImages(false);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -150,10 +190,17 @@ export default function TabSales() {
         data={filteredProducts.slice(0, currentPage * itemsPerPage)}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
+          <TouchableOpacity
+                      onPress={() => router.push(`/productScreen?id=${item.id}`)}
+                    >
           <View style={styles.productContainer}>
-            <Text style={styles.productName}>{item.nombre}</Text>
-            <Text style={styles.productPrice}>{item.precio} {item.moneda}</Text>
+            <Image source={{ uri: item.imgUrls[0] }} style={styles.productImage} />
+            <View style={styles.productDetails}>
+              <Text style={styles.productName}>{item.nombre}</Text>
+              <Text style={styles.productPrice}>{item.precio} {item.moneda}</Text>
+            </View>
           </View>
+          </TouchableOpacity>
         )}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
@@ -218,7 +265,24 @@ export default function TabSales() {
               value={contacto}
               onChangeText={setContacto}
             />
-            <TouchableOpacity style={styles.button} onPress={handlePostProduct}>
+            <TouchableOpacity style={styles.button} onPress={pickImages}>
+              <Text style={styles.buttonText}>Seleccionar Imágenes</Text>
+            </TouchableOpacity>
+            {loadingImages && (
+              <ActivityIndicator size="small" color="#1E90FF" style={styles.loadingIndicator} />
+            )}
+            {imgUrls.length > 0 && (
+              <View style={styles.imageContainer}>
+                {imgUrls.map((url, index) => (
+                  <Image key={index} source={{ uri: url }} style={styles.image} />
+                ))}
+              </View>
+            )}
+            <TouchableOpacity
+              style={[styles.button, loadingImages && styles.buttonDisabled]}
+              onPress={handlePostProduct}
+              disabled={loadingImages}
+            >
               <Text style={styles.buttonText}>Publicar</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
@@ -290,18 +354,29 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   productContainer: {
-    backgroundColor: '#2B373F',
+    flexDirection: 'row',
+    backgroundColor: '#a5a5a5',
     padding: 10,
     borderRadius: 8,
     marginVertical: 5,
   },
+  productImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  productDetails: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   productName: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
     fontWeight: 'bold',
   },
   productPrice: {
-    color: '#fff',
+    color: '#000',
     fontSize: 14,
   },
   emptyContainer: {
@@ -364,8 +439,25 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
+  buttonDisabled: {
+    backgroundColor: '#a5a5a5',
+  },
   buttonText: {
     color: '#FFF',
     fontWeight: 'bold',
+  },
+  loadingIndicator: {
+    marginTop: 10,
+  },
+  imageContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginVertical: 10,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    margin: 5,
   },
 });
